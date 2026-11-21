@@ -17,7 +17,7 @@ Tab ၅ ခု၊ prompt စာသားများ၊ မဟာဘုတ် �
 1. GitHub repo အသစ်မှာ ဒီဖိုင်တွေ တင်ပါ။
 2. Cloudflare Dashboard → Workers → Create → Git ချိတ်ပါ။
 3. Settings → Variables → Secret ထည့်ပါ: `GEMINI_API_KEY` = Gemini API key။
-4. Deploy — URL: `https://myanmar-ai-astrology.<subdomain>.workers.dev`
+4. Deploy — URL: `https://mm-ai-astrology.kyal.workers.dev/` (Worker name: `mm-ai-astrology`)
 
 Local စမ်းရန်: `npx wrangler dev` (`.dev.vars` ထဲမှာ `GEMINI_API_KEY` ထည့်ပါ)။
 
