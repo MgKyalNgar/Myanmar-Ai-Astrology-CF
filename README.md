@@ -29,3 +29,4 @@ Local စမ်းရန်: `npx wrangler dev` (`.dev.vars` ထဲမှာ `GE
 - Storage မပါ — ရလဒ်က စာမျက်နှာထဲမှာပဲ ရှိပြီး .txt download လုပ်လို့ရတယ်။
   (လိုအပ်ရင် Google Drive သုံးဖို့ စဉ်းစားထားတယ်။)
 - PWA (manifest/sw.js) မပါ — မူရင်း version မှာလည်း အလုပ်မလုပ်ခဲ့ပါ။
+- Key: AI Studio မှာ ရှိတဲ့ key ပဲ သုံးပါ (Streamlit key …kgr0h0 က AI Studio မှာ မရှိပါ)။
