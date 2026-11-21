@@ -32,7 +32,8 @@ function cleanText(t) {
 // --- Markdown အနည်းငယ် render (AI အဖြေက ###, **bold**, •, ၁။ သုံးတယ်) ---
 function renderMarkdown(text) {
   const esc = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const inline = (s) => s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const inline = (s) => s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
   let html = '', inUl = false, inOl = false;
   const close = () => { if (inUl) { html += '</ul>'; inUl = false; } if (inOl) { html += '</ol>'; inOl = false; } };
   for (const line of esc.split('\n')) {
@@ -41,7 +42,8 @@ function renderMarkdown(text) {
     let m;
     if ((m = t.match(/^#{4}\s+(.*)/))) { close(); html += `<h4>${inline(m[1])}</h4>`; }
     else if ((m = t.match(/^#{3}\s+(.*)/))) { close(); html += `<h3>${inline(m[1])}</h3>`; }
-    else if ((m = t.match(/^[•\-–]\s+(.*)/))) { if (!inUl) { close(); html += '<ul>'; inUl = true; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = t.match(/^#{2}\s+(.*)/))) { close(); html += `<h2>${inline(m[1])}</h2>`; }
+    else if ((m = t.match(/^[•\-–\*]\s+(.*)/))) { if (!inUl) { close(); html += '<ul>'; inUl = true; } html += `<li>${inline(m[1])}</li>`; }
     else if ((m = t.match(/^[0-9၀-၉]+[.)။]\s+(.*)/))) { if (!inOl) { close(); html += '<ol>'; inOl = true; } html += `<li>${inline(m[1])}</li>`; }
     else if (t === '---' || t === '***') { close(); html += '<hr>'; }
     else { close(); html += `<p>${inline(t)}</p>`; }
