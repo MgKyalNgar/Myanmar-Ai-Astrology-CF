@@ -24,6 +24,22 @@ const LUCKY = {
   Sunday:    { color: 'တောက်ပသော အနီရောင်',        hex: '#FF5252', text: 'တနင်္ဂနွေ' },
 };
 
+// --- နေ့စဉ် ကံကောင်းဂဏန်း (ရက်စွဲကနေ တွက်တယ် — တစ်နေ့လုံး တူတူ, နောက်နေ့ ပြောင်း) ---
+const MY_NUM = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
+const myNum = (n) => String(n).replace(/[0-9]/g, (d) => MY_NUM[+d]);
+function dailyLucky(dateISO) {
+  let h = 2166136261 >>> 0; // FNV-1a seed from the date
+  for (const ch of dateISO) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const picked = [];
+  let x = h;
+  while (picked.length < 3) {
+    x = (Math.imul(x, 1103515245) + 12345) >>> 0; // LCG step
+    const d = x % 10;
+    if (!picked.includes(d)) picked.push(d);
+  }
+  return picked;
+}
+
 // --- စာသား သန့်ရှင်းရေး (clean_ai_text အတိုင်း) ---
 function cleanText(t) {
   return t.replace(/\n{3,}/g, '\n').replace(/[ \t]+$/gm, '');
@@ -194,9 +210,11 @@ $('btn-maha').addEventListener('click', async (e) => {
 // --- အစပြုခြင်း ---
 (function init() {
   const lucky = LUCKY[todayEnDay] || LUCKY.Monday;
+  const nums = dailyLucky(todayISO);
   $('banner').innerHTML =
     `✨ ယနေ့ <b>${lucky.text}</b> နေ့အတွက် ကံကောင်းစေသောအရောင်မှာ ` +
-    `<b style="color: ${lucky.hex}; text-shadow: 1px 1px 2px black;">${lucky.color}</b> ဖြစ်ပါတယ် ✨`;
+    `<b style="color: ${lucky.hex}; text-shadow: 1px 1px 2px black;">${lucky.color}</b> ဖြစ်ပါတယ် — ` +
+    `ကံကောင်းဂဏန်း: <b>${nums.map(myNum).join(', ')}</b> ✨`;
   const dob = $('dob');
   dob.value = todayISO;
   dob.max = todayISO;
@@ -211,4 +229,4 @@ $('btn-maha').addEventListener('click', async (e) => {
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum };
