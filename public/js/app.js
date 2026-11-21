@@ -15,13 +15,13 @@ const DAYS_8 = ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင�
 
 // --- ကံကောင်းရောင် (app.py lucky_data အတိုင်း) ---
 const LUCKY = {
-  Monday:    { color: 'ဖြူစင်သော အဖြူရောင်',       hex: '#FFFFFF', text: 'တနင်္လာ' },
-  Tuesday:   { color: 'တောက်ပသော အနီရောင်',        hex: '#FF0000', text: 'အင်္ဂါ' },
+  Monday:    { color: 'ဝင်းပသော အဝါရောင်',         hex: '#FFFF00', text: 'တနင်္လာ' },
+  Tuesday:   { color: 'နူးညံ့သော ပန်းရောင်',        hex: '#FF8FB1', text: 'အင်္ဂါ' },
   Wednesday: { color: 'စိမ်းလန်းသော အစိမ်းရောင်',    hex: '#00FF00', text: 'ဗုဒ္ဓဟူး/ရာဟု' },
-  Thursday:  { color: 'ဝင်းပသော အဝါရောင်',         hex: '#FFFF00', text: 'ကြာသပတေး' },
+  Thursday:  { color: 'ရွှေအိုရောင်/လိမ္မော်ရောင်', hex: '#FFA500', text: 'ကြာသပတေး' },
   Friday:    { color: 'ကြည်လင်သော အပြာရောင်',      hex: '#6EA8FE', text: 'သောကြာ' },
   Saturday:  { color: 'နက်မှောင်သော ခရမ်းရောင်',     hex: '#C084FC', text: 'စနေ' },
-  Sunday:    { color: 'ရွှေအိုရောင်/လိမ္မော်ရောင်', hex: '#FFA500', text: 'တနင်္ဂနွေ' },
+  Sunday:    { color: 'တောက်ပသော အနီရောင်',        hex: '#FF5252', text: 'တနင်္ဂနွေ' },
 };
 
 // --- စာသား သန့်ရှင်းရေး (clean_ai_text အတိုင်း) ---
