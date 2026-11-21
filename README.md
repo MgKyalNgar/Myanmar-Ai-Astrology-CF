@@ -19,7 +19,7 @@ Tab ၅ ခု၊ prompt စာသားများ၊ မဟာဘုတ် �
 3. Settings → Variables → Secret ထည့်ပါ: `GEMINI_API_KEY` = Gemini API key (Runtime secret အဖြစ် ထည့်ရမယ် — Build secret သီးသန့်ဆို Worker က key ကို မမြင်ရဘူး)။
 4. Deploy — URL: `https://mm-ai-astrology.kyal.workers.dev/` (Worker name: `mm-ai-astrology`)
 
-> Git auto-deploy အတွက် "Cloudflare Workers and Pages" GitHub App ကို repo မှာ install ထားရမယ် (https://github.com/apps/cloudflare-workers-and-pages/installations/new)။ Push လုပ်ပြီး deploy မဖြစ်ရင် repo Settings → Webhooks မှာ Cloudflare webhook ရှိ/မရှိ စစ်ပါ။
+> Git auto-deploy အတွက် "Cloudflare Workers and Pages" GitHub App ကို repo မှာ install ထားရမယ် (https://github.com/apps/cloudflare-workers-and-pages/installations/new)။ Push လုပ်ပြီး deploy မဖြစ်ရင် repo Settings → Webhooks မှာ Cloudflare webhook ရှိ/မရှိ စစ်ပါ။ (App install လုပ်ပြီးတာ 21 Nov 2026။)
 
 Local စမ်းရန်: `npx wrangler dev` (`.dev.vars` ထဲမှာ `GEMINI_API_KEY` ထည့်ပါ)။
 
