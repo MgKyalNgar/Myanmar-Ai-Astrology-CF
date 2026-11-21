@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Myanmar AI Astrology — မြန်မာ့ဗေဒင်နှင့် ဓာတ်ရိုက်ဓာတ်ဆင် AI</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="stars"></div>
+<main class="container">
+
+  <div id="banner" class="banner"></div>
+  <h1>🔮 မြန်မာ့ဗေဒင်နှင့် ဓာတ်ရိုက်ဓာတ်ဆင် AI</h1>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="comp">💞 အိမ်ထောင်ဖက်</button>
+    <button class="tab-btn" data-tab="dream">🌙 အိပ်မက်</button>
+    <button class="tab-btn" data-tab="yadaya">🛡️ ယတြာ</button>
+    <button class="tab-btn" data-tab="horo">✨ ဟောစာတမ်း</button>
+    <button class="tab-btn" data-tab="maha">📜 မဟာဘုတ်</button>
+  </nav>
+
+  <!-- Tab 1: အိမ်ထောင်ဖက် -->
+  <section id="panel-comp" class="tab-panel active">
+    <p class="panel-title">နှစ်ဦးသား လိုက်ဖက်ညီမှု စစ်ဆေးရန်</p>
+    <div class="cols">
+      <div>
+        <h2>မိမိအချက်အလက်</h2>
+        <label class="field-label" for="u-comp">သင့်အမည်</label>
+        <input id="u-comp" type="text" autocomplete="off">
+        <label class="field-label" for="u-day-comp">သင့်နေ့နံ</label>
+        <select id="u-day-comp">
+          <option>တနင်္ဂနွေ</option><option>တနင်္လာ</option><option>အင်္ဂါ</option><option>ဗုဒ္ဓဟူး</option>
+          <option>ရာဟု</option><option>ကြာသပတေး</option><option>သောကြာ</option><option>စနေ</option>
+        </select>
+      </div>
+      <div>
+        <h2>လက်တွဲဖော်</h2>
+        <label class="field-label" for="p-comp">လက်တွဲဖော်အမည်</label>
+        <input id="p-comp" type="text" autocomplete="off">
+        <label class="field-label" for="p-day-comp">လက်တွဲဖော်နေ့နံ</label>
+        <select id="p-day-comp">
+          <option>တနင်္ဂနွေ</option><option>တနင်္လာ</option><option>အင်္ဂါ</option><option>ဗုဒ္ဓဟူး</option>
+          <option>ရာဟု</option><option>ကြာသပတေး</option><option>သောကြာ</option><option>စနေ</option>
+        </select>
+      </div>
+    </div>
+    <button id="btn-comp" class="btn" data-label="တွဲဖက်မှု စစ်ဆေးမယ် 💞">တွဲဖက်မှု စစ်ဆေးမယ် 💞</button>
+    <div id="result-comp"></div>
+    <button id="dl-comp" class="btn-dl" style="display:none">📁 ရလဒ်ကိုသိမ်းမယ်</button>
+  </section>
+
+  <!-- Tab 2: အိပ်မက် -->
+  <section id="panel-dream" class="tab-panel">
+    <label class="field-label" for="dream-input">သင်မက်ခဲ့သည့် အိပ်မက်ကို ရေးပါ...</label>
+    <textarea id="dream-input" rows="4"></textarea>
+    <button id="btn-dream" class="btn" data-label="နိမိတ်ဖတ်မယ် 🌙">နိမိတ်ဖတ်မယ် 🌙</button>
+    <div id="result-dream"></div>
+    <button id="dl-dream" class="btn-dl" style="display:none">📁 ရလဒ်ကိုသိမ်းမယ်</button>
+  </section>
+
+  <!-- Tab 3: ယတြာ -->
+  <section id="panel-yadaya" class="tab-panel">
+    <label class="field-label" for="u-name">သင့်အမည်</label>
+    <input id="u-name" type="text" autocomplete="off">
+    <label class="field-label" for="problem">ရင်ဆိုင်နေရသော အခက်အခဲ</label>
+    <select id="problem">
+      <option>စီးပွားရေးညံ့ခြင်း/ငွေကြေးခက်ခဲခြင်း</option>
+      <option>အချစ်ရေးအဆင်မပြေခြင်း</option>
+      <option>အိမ်ထောင်ရေးအဆင်မပြေခြင်း</option>
+      <option>ကျန်းမာရေးမကောင်းခြင်း</option>
+      <option>အတိုက်အခံ/ရန်များခြင်း</option>
+      <option>အလုပ်အကိုင်ခက်ခဲခြင်း</option>
+      <option>ပညာရေးအဆင်မပြေခြင်း</option>
+      <option>အကြွေးကိစ္စအခက်အခဲဖြစ်ခြင်း</option>
+      <option>တရားရင်ဆိုင်နေရခြင်း</option>
+      <option>ခရီးသွားလာရန်အခက်အခဲရှိခြင်း</option>
+    </select>
+    <button id="btn-yadaya" class="btn" data-label="ယတြာတောင်းမယ် 🛡️">ယတြာတောင်းမယ် 🛡️</button>
+    <div id="result-yadaya"></div>
+    <button id="dl-yadaya" class="btn-dl" style="display:none">📁 ယတြာကိုသိမ်းမယ်</button>
+  </section>
+
+  <!-- Tab 4: ဟောစာတမ်း -->
+  <section id="panel-horo" class="tab-panel">
+    <label class="field-label" for="horo-day">သင့်မွေးနေ့ ရွေးပါ</label>
+    <select id="horo-day">
+      <option>တနင်္ဂနွေ</option><option>တနင်္လာ</option><option>အင်္ဂါ</option><option>ဗုဒ္ဓဟူး</option>
+      <option>ရာဟု</option><option>ကြာသပတေး</option><option>သောကြာ</option><option>စနေ</option>
+    </select>
+    <button id="btn-horo" class="btn" data-label="ဟောစာတမ်းကြည့်မယ် ✨">ဟောစာတမ်းကြည့်မယ် ✨</button>
+    <div id="result-horo"></div>
+    <button id="dl-horo" class="btn-dl" style="display:none">📂 ဟောစာတမ်းသိမ်းမယ်</button>
+  </section>
+
+  <!-- Tab 5: မဟာဘုတ် -->
+  <section id="panel-maha" class="tab-panel">
+    <p class="panel-title">သင့်မွေးသက္ကရာဇ်ကို ထည့်သွင်းပါ</p>
+    <label class="field-label" for="dob">မွေးသက္ကရာဇ် (ခရစ်နှစ်)</label>
+    <input id="dob" type="date">
+    <label class="field-label" for="maha-day">မွေးဖွားရာ နေ့နံ</label>
+    <select id="maha-day">
+      <option>တနင်္ဂနွေ</option><option>တနင်္လာ</option><option>အင်္ဂါ</option><option>ဗုဒ္ဓဟူး</option>
+      <option>ရာဟု</option><option>ကြာသပတေး</option><option>သောကြာ</option><option>စနေ</option>
+    </select>
+    <button id="btn-maha" class="btn" data-label="ဇာတာတွက်မယ် 📜">ဇာတာတွက်မယ် 📜</button>
+    <div id="warn-maha" class="warn-box" style="display:none"></div>
+    <div id="result-maha"></div>
+    <button id="dl-maha" class="btn-dl" style="display:none">📁 ဇာတာကိုသိမ်းမယ်</button>
+  </section>
+
+  <footer>
+    <hr>
+    <div class="footer-row">
+      <span>Developed with ❤️ by Mg Kyal Ngar | Astrology AI v3.5</span>
+      <a id="visitor-badge-link" href="https://visitorbadge.io" target="_blank" rel="noopener">
+        <img id="visitor-badge" alt="Visitor Counter">
+      </a>
+    </div>
+    <div class="fb-wrap">
+      <a id="fb-share" href="#" target="_blank" rel="noopener" class="fb-btn">🔵 Facebook မှာ Share မယ်</a>
+    </div>
+  </footer>
+</main>
+<script src="/js/prompts.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
