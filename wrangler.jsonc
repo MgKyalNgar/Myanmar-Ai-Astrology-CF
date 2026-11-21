@@ -1,1 +1,1 @@
-{"$schema":"node_modules/wrangler/config-schema.json","assets":{"directory":"./public","run_worker_first":["/api/*"]},"compatibility_date":"2026-11-21","main":"src/index.js","name":"myanmar-ai-astrology"}
+{"$schema":"node_modules/wrangler/config-schema.json","assets":{"directory":"./public","run_worker_first":["/api/*"]},"compatibility_date":"2026-11-21","main":"src/index.js","name":"mm-ai-astrology"}
