@@ -281,16 +281,32 @@ $('btn-horo').addEventListener('click', async (e) => {
   runButton(btn, false);
 });
 
-// --- Tab 5: မဟာဘုတ် ---
-$('btn-maha').addEventListener('click', async (e) => {
+// --- မဟာဘုတ်: သတိပေးစာ live စစ်တာ + date ပြောင်းရင် နေ့နံ အော်တို ---
+function updateMahaWarn() {
   const dob = $('dob').value, birthDay = $('maha-day').value;
-  if (!dob) { showError('maha', 'မွေးသက္ကရာဇ် ထည့်ပေးပါ ခင်ဗျာ။'); return; }
-  const { remainder, position, derivedDay, warn } = mahabote(dob, birthDay);
+  if (!dob) { $('warn-maha').style.display = 'none'; return; }
+  const { derivedDay, warn } = mahabote(dob, birthDay);
   if (warn) {
     const dobLong = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
       .format(new Date(dob + 'T00:00:00Z'));
     showWarn('maha', `သတိပြုပါ — ရွေးထားသော နေ့နံ (${birthDay}) က မွေးသက္ကရာဇ်နှင့် မကိုက်ပါ။ ${dobLong} ရက်နေ့၏ နေ့နံမှာ ${derivedDay} ဖြစ်ပါသည်။`);
   } else { $('warn-maha').style.display = 'none'; }
+}
+
+function syncWeekdayFromDob() {
+  const dob = $('dob').value;
+  if (!dob) return;
+  const { derivedDay } = mahabote(dob, $('maha-day').value);
+  $('maha-day').value = derivedDay;
+  updateMahaWarn();
+}
+
+// --- Tab 5: မဟာဘုတ် ---
+$('btn-maha').addEventListener('click', async (e) => {
+  const dob = $('dob').value, birthDay = $('maha-day').value;
+  if (!dob) { showError('maha', 'မွေးသက္ကရာဇ် ထည့်ပေးပါ ခင်ဗျာ။'); return; }
+  const { remainder, position } = mahabote(dob, birthDay);
+  updateMahaWarn();
   const btn = e.currentTarget;
   runButton(btn, true, 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...');
   try {
@@ -299,6 +315,10 @@ $('btn-maha').addEventListener('click', async (e) => {
   } catch (err) { showError('maha', err.message); }
   runButton(btn, false);
 });
+
+// နေ့နံ ပြောင်းတာနဲ့ သတိပေးစာ ချက်ချင်း စစ်တာ + date ပြောင်းတာနဲ့ နေ့နံ အော်တို
+$('maha-day').addEventListener('change', updateMahaWarn);
+$('dob').addEventListener('change', syncWeekdayFromDob);
 
 // --- အစပြုခြင်း ---
 (function init() {
@@ -312,6 +332,7 @@ $('btn-maha').addEventListener('click', async (e) => {
   dob.value = todayISO;
   dob.max = todayISO;
   dob.min = '1920-01-01';
+  syncWeekdayFromDob(); // ဒီနေ့နဲ့ ကိုက်တဲ့ နေ့နံကို အလိုလို ရွေးထားမယ်
   // Footer: visitor badge + Facebook share (လက်ရှိ URL အတိုင်း)
   const url = location.href;
   $('visitor-badge').src =
@@ -321,6 +342,7 @@ $('btn-maha').addEventListener('click', async (e) => {
   $('fb-share').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
   // မှတ်တမ်း — နောက်ဆုံး အဖြေတွေ ပြန်ဖော်တာ + list ပြတာ
   restoreLastResults();
+  updateMahaWarn(); // သိမ်းထားတဲ့ မဟာဘုတ် entry ရှိရင် သတိပေးစာ အခြေအနေ မှန်အောင်
   renderHistory();
   $('history-list').addEventListener('click', (e) => {
     const viewBtn = e.target.closest('.history-view-btn');
@@ -335,4 +357,4 @@ $('btn-maha').addEventListener('click', async (e) => {
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs, updateMahaWarn, syncWeekdayFromDob };
