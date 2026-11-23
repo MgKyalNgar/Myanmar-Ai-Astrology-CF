@@ -99,12 +99,53 @@ async function askAI(prompt) {
 const $ = (id) => document.getElementById(id);
 const results = {}; // tab -> ရလဒ် စာသား
 
-function showResult(tab, text, fileName) {
+// --- မှတ်တမ်း သိမ်းခြင်း (ဖုန်းထဲမှာပဲ — localStorage, DB မလို) ---
+const HISTORY_KEY = 'mm_astrology_history';
+const HISTORY_MAX = 20;
+const TAB_TITLES = { comp: '💞 အိမ်ထောင်ဖက်', dream: '🌙 အိပ်မက်', yadaya: '🛡️ ယတြာ', horo: '✨ ဟောစာတမ်း', maha: '📜 မဟာဘုတ်' };
+const DL_FILES = { comp: 'compatibility_result.txt', dream: 'dream.txt', yadaya: 'yadaya.txt', horo: 'horoscope.txt', maha: 'mahabote_astrology.txt' };
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function shortLabel(s, n) {
+  const t = String(s), lim = n || 40;
+  return t.length > lim ? t.slice(0, lim) + '…' : t;
+}
+// သန့်ရှင်း pure functions (node test အတွက်) — list ထဲ entry ထည့်/ဖျက်
+function historyAdd(list, entry) {
+  const next = [{ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), ...entry }, ...list];
+  return next.slice(0, HISTORY_MAX);
+}
+function historyDelete(list, id) { return list.filter((x) => x.id !== id); }
+function loadHistory() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function saveHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) { /* သိမ်းမရရင် — ဘာမှ မလုပ်ပါ */ }
+}
+function addHistory(entry) { const next = historyAdd(loadHistory(), entry); saveHistory(next); return next; }
+function deleteHistory(id) { const next = historyDelete(loadHistory(), id); saveHistory(next); return next; }
+function clearHistory() { saveHistory([]); }
+
+function renderResult(tab, text, fileName, savedNote) {
   results[tab] = text;
   const box = $('result-' + tab);
-  box.innerHTML = `<div class="result-card">${renderMarkdown(text)}</div>`;
+  box.innerHTML = (savedNote ? `<p class="saved-note">💾 ${escapeHtml(savedNote)}</p>` : '') +
+    `<div class="result-card">${renderMarkdown(text)}</div>`;
   $('dl-' + tab).style.display = 'inline-block';
   $('dl-' + tab).onclick = () => download(text, fileName);
+}
+
+function showResult(tab, text, fileName, label) {
+  renderResult(tab, text, fileName, '');
+  if (label) {
+    addHistory({ tab, label, text, date: fmtDate.format(new Date()) });
+    renderHistory();
+  }
 }
 
 function showError(tab, msg) {
@@ -124,6 +165,47 @@ function download(text, fileName) {
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// --- မှတ်တမ်း tab ---
+function renderHistory() {
+  const listEl = $('history-list');
+  if (!listEl) return;
+  const list = loadHistory();
+  $('btn-clear-history').style.display = list.length ? 'inline-block' : 'none';
+  $('history-view').innerHTML = '';
+  if (!list.length) {
+    listEl.innerHTML = '<p class="history-empty">မှတ်တမ်း မရှိသေးပါ — ဟောစာတမ်း ဖတ်ပြီးရင် ဒီမှာ ပေါ်လာမယ်။</p>';
+    return;
+  }
+  listEl.innerHTML = list.map((e) => `
+    <div class="history-item">
+      <div class="history-meta"><span>${escapeHtml(TAB_TITLES[e.tab] || e.tab)}</span><span>${escapeHtml(e.date || '')}</span></div>
+      <div class="history-label">${escapeHtml(e.label || '')}</div>
+      <div class="history-actions">
+        <button type="button" class="history-view-btn" data-id="${e.id}">ကြည့်မယ်</button>
+        <button type="button" class="history-del-btn" data-id="${e.id}">ဖျက်မယ်</button>
+      </div>
+    </div>`).join('');
+}
+
+function showHistoryEntry(id) {
+  const entry = loadHistory().find((x) => x.id === id);
+  const view = $('history-view');
+  if (!entry || !view) return;
+  view.innerHTML = `<p class="saved-note">💾 ${escapeHtml(TAB_TITLES[entry.tab] || entry.tab)} — ${escapeHtml(entry.date || '')}</p>` +
+    `<div class="result-card">${renderMarkdown(entry.text)}</div>` +
+    `<button type="button" class="btn-dl" id="dl-history-view">📁 ရလဒ်ကိုသိမ်းမယ်</button>`;
+  $('dl-history-view').onclick = () => download(entry.text, DL_FILES[entry.tab] || 'reading.txt');
+  view.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function restoreLastResults() {
+  const list = loadHistory();
+  for (const tab of Object.keys(TAB_TITLES)) {
+    const entry = list.find((x) => x.tab === tab);
+    if (entry) renderResult(tab, entry.text, DL_FILES[tab], 'သိမ်းထားတဲ့ အဖြေ — ' + (entry.date || ''));
+  }
 }
 
 function runButton(btn, busy, label) {
@@ -149,7 +231,7 @@ $('btn-comp').addEventListener('click', async (e) => {
   runButton(btn, true, 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...');
   try {
     const prompt = COMPATIBILITY_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('u-day-comp').value, pName, $('p-day-comp').value);
-    showResult('comp', await askAI(prompt), 'compatibility_result.txt');
+    showResult('comp', await askAI(prompt), 'compatibility_result.txt', shortLabel(uName + ' + ' + pName));
   } catch (err) { showError('comp', err.message); }
   runButton(btn, false);
 });
@@ -161,7 +243,7 @@ $('btn-dream').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt');
+    showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt', shortLabel(dream));
   } catch (err) { showError('dream', err.message); }
   runButton(btn, false);
 });
@@ -173,7 +255,7 @@ $('btn-yadaya').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt');
+    showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt', shortLabel(uName + ' — ' + $('problem').value));
   } catch (err) { showError('yadaya', err.message); }
   runButton(btn, false);
 });
@@ -183,7 +265,7 @@ $('btn-horo').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt');
+    showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt', shortLabel($('horo-day').value + ' နေ့ ဟောစာတမ်း'));
   } catch (err) { showError('horo', err.message); }
   runButton(btn, false);
 });
@@ -202,7 +284,7 @@ $('btn-maha').addEventListener('click', async (e) => {
   runButton(btn, true, 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...');
   try {
     const prompt = MAHABOTE_TEMPLATE(SYSTEM_INSTRUCTION, dob, birthDay, remainder, position);
-    showResult('maha', await askAI(prompt), 'mahabote_astrology.txt');
+    showResult('maha', await askAI(prompt), 'mahabote_astrology.txt', shortLabel(dob + ' · ' + birthDay));
   } catch (err) { showError('maha', err.message); }
   runButton(btn, false);
 });
@@ -226,7 +308,20 @@ $('btn-maha').addEventListener('click', async (e) => {
     '&label=VISITORS&countColor=%23d4af37&style=flat';
   $('visitor-badge-link').href = 'https://visitorbadge.io/status?path=' + encodeURIComponent(url);
   $('fb-share').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+  // မှတ်တမ်း — နောက်ဆုံး အဖြေတွေ ပြန်ဖော်တာ + list ပြတာ
+  restoreLastResults();
+  renderHistory();
+  $('history-list').addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('.history-view-btn');
+    const delBtn = e.target.closest('.history-del-btn');
+    if (viewBtn) showHistoryEntry(viewBtn.dataset.id);
+    else if (delBtn) { deleteHistory(delBtn.dataset.id); renderHistory(); }
+  });
+  $('btn-clear-history').addEventListener('click', () => {
+    if (!confirm('မှတ်တမ်း အားလုံး ဖျက်မှာလား?')) return;
+    clearHistory(); renderHistory();
+  });
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX };

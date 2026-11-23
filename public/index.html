@@ -19,6 +19,7 @@
     <button class="tab-btn" data-tab="yadaya">🛡️ ယတြာ</button>
     <button class="tab-btn" data-tab="horo">✨ ဟောစာတမ်း</button>
     <button class="tab-btn" data-tab="maha">📜 မဟာဘုတ်</button>
+    <button class="tab-btn" data-tab="history">🗂️ မှတ်တမ်း</button>
   </nav>
 
   <!-- Tab 1: အိမ်ထောင်ဖက် -->
@@ -110,10 +111,19 @@
     <button id="dl-maha" class="btn-dl" style="display:none">📁 ဇာတာကိုသိမ်းမယ်</button>
   </section>
 
+  <!-- Tab 6: မှတ်တမ်း -->
+  <section id="panel-history" class="tab-panel">
+    <p class="panel-title">သိမ်းထားတဲ့ ဟောစာတမ်းများ</p>
+    <p class="history-note">အဖြေတွေက ဒီဖုန်းထဲမှာပဲ သိမ်းထားပါတယ် — အများဆုံး ၂၀ ခု။</p>
+    <div id="history-list"></div>
+    <button id="btn-clear-history" class="btn-dl" style="display:none">🗑️ မှတ်တမ်း အားလုံး ဖျက်မယ်</button>
+    <div id="history-view"></div>
+  </section>
+
   <footer>
     <hr>
     <div class="footer-row">
-      <span>Developed with ❤️ by Mg Kyal Ngar | Astrology AI v4.0</span>
+      <span>Developed with ❤️ by Mg Kyal Ngar | Astrology AI v4.1</span>
       <a id="visitor-badge-link" href="https://visitorbadge.io" target="_blank" rel="noopener">
         <img id="visitor-badge" alt="Visitor Counter">
       </a>

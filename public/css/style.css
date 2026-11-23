@@ -78,3 +78,21 @@ footer hr { border: 0; border-top: 1px solid rgba(212, 175, 55, .3); margin: 30p
 .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; color: #D4AF37; font-size: .9rem; font-weight: bold; }
 .fb-wrap { text-align: center; margin-top: 25px; }
 .fb-btn { background: #1877F2; color: #fff; padding: 10px 25px; border-radius: 25px; font-weight: bold; text-decoration: none; display: inline-block; }
+
+/* History (23 Nov 2026) — မှတ်တမ်း tab */
+.saved-note { font-size: .85rem; color: #D4AF37; margin: 10px 0 0; }
+.history-note { opacity: .75; font-size: .95rem; margin: 0 0 14px; }
+.history-empty { opacity: .75; text-align: center; padding: 20px 0; }
+.history-item {
+  background: rgba(26, 28, 35, .95); border: 1px solid #D4AF37; border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px;
+}
+.history-meta { display: flex; justify-content: space-between; gap: 10px; color: #D4AF37; font-size: .9rem; font-weight: bold; }
+.history-label { margin: 6px 0 10px; line-height: 1.4; }
+.history-actions { display: flex; gap: 8px; }
+.history-view-btn, .history-del-btn {
+  padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: .9rem;
+  background: transparent; color: #D4AF37; border: 1px solid #D4AF37;
+}
+.history-del-btn { color: #ff8a8a; border-color: #ff8a8a; }
+#history-view { margin-top: 14px; }
