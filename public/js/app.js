@@ -130,6 +130,14 @@ function saveHistory(list) {
 function addHistory(entry) { const next = historyAdd(loadHistory(), entry); saveHistory(next); return next; }
 function deleteHistory(id) { const next = historyDelete(loadHistory(), id); saveHistory(next); return next; }
 function clearHistory() { saveHistory([]); }
+// မေးခွန်း input တွေ ပြန်ဖြည့်တာ (reload ပြီးရင် မေးခွန်းပါ ပြန်ပေါ်အောင်)
+function applyInputs(inputs) {
+  if (!inputs) return;
+  for (const [id, val] of Object.entries(inputs)) {
+    const el = $(id);
+    if (el) el.value = val;
+  }
+}
 
 function renderResult(tab, text, fileName, savedNote) {
   results[tab] = text;
@@ -140,10 +148,10 @@ function renderResult(tab, text, fileName, savedNote) {
   $('dl-' + tab).onclick = () => download(text, fileName);
 }
 
-function showResult(tab, text, fileName, label) {
+function showResult(tab, text, fileName, label, inputs) {
   renderResult(tab, text, fileName, '');
   if (label) {
-    addHistory({ tab, label, text, date: fmtDate.format(new Date()) });
+    addHistory({ tab, label, text, inputs: inputs || null, date: fmtDate.format(new Date()) });
     renderHistory();
   }
 }
@@ -204,7 +212,10 @@ function restoreLastResults() {
   const list = loadHistory();
   for (const tab of Object.keys(TAB_TITLES)) {
     const entry = list.find((x) => x.tab === tab);
-    if (entry) renderResult(tab, entry.text, DL_FILES[tab], 'သိမ်းထားတဲ့ အဖြေ — ' + (entry.date || ''));
+    if (entry) {
+      renderResult(tab, entry.text, DL_FILES[tab], 'သိမ်းထားတဲ့ အဖြေ — ' + (entry.date || ''));
+      applyInputs(entry.inputs);
+    }
   }
 }
 
@@ -231,7 +242,7 @@ $('btn-comp').addEventListener('click', async (e) => {
   runButton(btn, true, 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...');
   try {
     const prompt = COMPATIBILITY_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('u-day-comp').value, pName, $('p-day-comp').value);
-    showResult('comp', await askAI(prompt), 'compatibility_result.txt', shortLabel(uName + ' + ' + pName));
+    showResult('comp', await askAI(prompt), 'compatibility_result.txt', shortLabel(uName + ' + ' + pName), { 'u-comp': uName, 'u-day-comp': $('u-day-comp').value, 'p-comp': pName, 'p-day-comp': $('p-day-comp').value });
   } catch (err) { showError('comp', err.message); }
   runButton(btn, false);
 });
@@ -243,7 +254,7 @@ $('btn-dream').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt', shortLabel(dream));
+    showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt', shortLabel(dream), { 'dream-input': dream });
   } catch (err) { showError('dream', err.message); }
   runButton(btn, false);
 });
@@ -255,7 +266,7 @@ $('btn-yadaya').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt', shortLabel(uName + ' — ' + $('problem').value));
+    showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt', shortLabel(uName + ' — ' + $('problem').value), { 'u-name': uName, 'problem': $('problem').value });
   } catch (err) { showError('yadaya', err.message); }
   runButton(btn, false);
 });
@@ -265,7 +276,7 @@ $('btn-horo').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
   runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
-    showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt', shortLabel($('horo-day').value + ' နေ့ ဟောစာတမ်း'));
+    showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt', shortLabel($('horo-day').value + ' နေ့ ဟောစာတမ်း'), { 'horo-day': $('horo-day').value });
   } catch (err) { showError('horo', err.message); }
   runButton(btn, false);
 });
@@ -284,7 +295,7 @@ $('btn-maha').addEventListener('click', async (e) => {
   runButton(btn, true, 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...');
   try {
     const prompt = MAHABOTE_TEMPLATE(SYSTEM_INSTRUCTION, dob, birthDay, remainder, position);
-    showResult('maha', await askAI(prompt), 'mahabote_astrology.txt', shortLabel(dob + ' · ' + birthDay));
+    showResult('maha', await askAI(prompt), 'mahabote_astrology.txt', shortLabel(dob + ' · ' + birthDay), { 'dob': dob, 'maha-day': birthDay });
   } catch (err) { showError('maha', err.message); }
   runButton(btn, false);
 });
@@ -324,4 +335,4 @@ $('btn-maha').addEventListener('click', async (e) => {
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs };
