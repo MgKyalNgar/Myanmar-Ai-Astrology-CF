@@ -139,14 +139,8 @@ function applyInputs(inputs) {
   }
 }
 
-const CHAKRA_SVG = `<svg class="chakra-spin" viewBox="0 0 64 64" fill="none" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="32" cy="32" r="26"/><circle cx="32" cy="32" r="6"/><line x1="32" y1="23" x2="32" y2="8"/><line x1="38" y1="26" x2="49" y2="15"/><line x1="41" y1="32" x2="56" y2="32"/><line x1="38" y1="38" x2="49" y2="49"/><line x1="32" y1="41" x2="32" y2="56"/><line x1="26" y1="38" x2="15" y2="49"/><line x1="23" y1="32" x2="8" y2="32"/><line x1="26" y1="26" x2="15" y2="15"/></svg>`;
-
-// AI တွက်နေတုန်း ရွှေရောင် စကြာ လည်နေတာ + စာသား ပြတာ (အဖြေ/ error ရတာနဲ့ အစားထိုးမယ်)
-function showLoading(tab, label) {
-  const box = $('result-' + tab);
-  box.innerHTML = `<div class="loading-wrap">${CHAKRA_SVG}<p>${escapeHtml(label)}</p></div>`;
-  $('dl-' + tab).style.display = 'none';
-}
+// ပဒုမ္မာစကြာ — အပွင့်ပုံ ချောင်း ၈ ချောင်း + အလယ်မှာ ကြယ် (ခလုတ် ထဲက loading spinner အတွက်)
+const LOTUS_CHAKRA_SVG = `<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="26" stroke="#D4AF37" stroke-width="3.5"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(45 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(90 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(135 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(180 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(225 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(270 32 32)"/><ellipse cx="32" cy="17" rx="5" ry="10" fill="#D4AF37" transform="rotate(315 32 32)"/><circle cx="32" cy="32" r="6" stroke="#D4AF37" stroke-width="2.5"/><path d="M32 27.5 L33.6 30.4 L36.5 32 L33.6 33.6 L32 36.5 L30.4 33.6 L27.5 32 L30.4 30.4 Z" fill="#D4AF37"/></svg>`;
 
 function renderResult(tab, text, fileName) {
   results[tab] = text;
@@ -227,7 +221,11 @@ function restoreLastInputs() {
 
 function runButton(btn, busy, label) {
   btn.disabled = busy;
-  btn.textContent = busy ? label : btn.dataset.label;
+  if (busy) {
+    btn.innerHTML = `<span class="btn-spinner">${LOTUS_CHAKRA_SVG}</span> ${escapeHtml(label)}`;
+  } else {
+    btn.textContent = btn.dataset.label;
+  }
 }
 
 // --- Tab ပြောင်းခြင်း ---
@@ -245,9 +243,7 @@ $('btn-comp').addEventListener('click', async (e) => {
   const uName = $('u-comp').value.trim(), pName = $('p-comp').value.trim();
   if (!uName || !pName) { showError('comp', 'အမည်နှစ်ခုလုံးကို ပြည့်စုံအောင် ဖြည့်ပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  const loadingLabel = 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...';
-  runButton(btn, true, loadingLabel);
-  showLoading('comp', loadingLabel);
+  runButton(btn, true, 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...');
   try {
     const prompt = COMPATIBILITY_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('u-day-comp').value, pName, $('p-day-comp').value);
     showResult('comp', await askAI(prompt), 'compatibility_result.txt', shortLabel(uName + ' + ' + pName), { 'u-comp': uName, 'u-day-comp': $('u-day-comp').value, 'p-comp': pName, 'p-day-comp': $('p-day-comp').value });
@@ -260,9 +256,7 @@ $('btn-dream').addEventListener('click', async (e) => {
   const dream = $('dream-input').value.trim();
   if (!dream) { showError('dream', 'အိပ်မက်ကို အရင်ရေးပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
-  runButton(btn, true, loadingLabel);
-  showLoading('dream', loadingLabel);
+  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
     showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt', shortLabel(dream), { 'dream-input': dream });
   } catch (err) { showError('dream', err.message); }
@@ -274,9 +268,7 @@ $('btn-yadaya').addEventListener('click', async (e) => {
   const uName = $('u-name').value.trim();
   if (!uName) { showError('yadaya', 'အမည် ထည့်ပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
-  runButton(btn, true, loadingLabel);
-  showLoading('yadaya', loadingLabel);
+  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
     showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt', shortLabel(uName + ' — ' + $('problem').value), { 'u-name': uName, 'problem': $('problem').value });
   } catch (err) { showError('yadaya', err.message); }
@@ -286,9 +278,7 @@ $('btn-yadaya').addEventListener('click', async (e) => {
 // --- Tab 4: ဟောစာတမ်း ---
 $('btn-horo').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
-  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
-  runButton(btn, true, loadingLabel);
-  showLoading('horo', loadingLabel);
+  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
   try {
     showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt', shortLabel($('horo-day').value + ' နေ့ ဟောစာတမ်း'), { 'horo-day': $('horo-day').value });
   } catch (err) { showError('horo', err.message); }
@@ -322,9 +312,7 @@ $('btn-maha').addEventListener('click', async (e) => {
   const { remainder, position } = mahabote(dob, birthDay);
   updateMahaWarn();
   const btn = e.currentTarget;
-  const loadingLabel = 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...';
-  runButton(btn, true, loadingLabel);
-  showLoading('maha', loadingLabel);
+  runButton(btn, true, 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...');
   try {
     const prompt = MAHABOTE_TEMPLATE(SYSTEM_INSTRUCTION, dob, birthDay, remainder, position);
     showResult('maha', await askAI(prompt), 'mahabote_astrology.txt', shortLabel(dob + ' · ' + birthDay), { 'dob': dob, 'maha-day': birthDay });
@@ -373,4 +361,4 @@ $('dob').addEventListener('change', syncWeekdayFromDob);
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs, updateMahaWarn, syncWeekdayFromDob, restoreLastInputs, showLoading };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs, updateMahaWarn, syncWeekdayFromDob, restoreLastInputs, runButton };
