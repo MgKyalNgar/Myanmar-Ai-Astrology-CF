@@ -139,17 +139,25 @@ function applyInputs(inputs) {
   }
 }
 
-function renderResult(tab, text, fileName, savedNote) {
+const CHAKRA_SVG = `<svg class="chakra-spin" viewBox="0 0 64 64" fill="none" stroke="#D4AF37" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="32" cy="32" r="26"/><circle cx="32" cy="32" r="6"/><line x1="32" y1="23" x2="32" y2="8"/><line x1="38" y1="26" x2="49" y2="15"/><line x1="41" y1="32" x2="56" y2="32"/><line x1="38" y1="38" x2="49" y2="49"/><line x1="32" y1="41" x2="32" y2="56"/><line x1="26" y1="38" x2="15" y2="49"/><line x1="23" y1="32" x2="8" y2="32"/><line x1="26" y1="26" x2="15" y2="15"/></svg>`;
+
+// AI တွက်နေတုန်း ရွှေရောင် စကြာ လည်နေတာ + စာသား ပြတာ (အဖြေ/ error ရတာနဲ့ အစားထိုးမယ်)
+function showLoading(tab, label) {
+  const box = $('result-' + tab);
+  box.innerHTML = `<div class="loading-wrap">${CHAKRA_SVG}<p>${escapeHtml(label)}</p></div>`;
+  $('dl-' + tab).style.display = 'none';
+}
+
+function renderResult(tab, text, fileName) {
   results[tab] = text;
   const box = $('result-' + tab);
-  box.innerHTML = (savedNote ? `<p class="saved-note">💾 ${escapeHtml(savedNote)}</p>` : '') +
-    `<div class="result-card">${renderMarkdown(text)}</div>`;
+  box.innerHTML = `<div class="result-card">${renderMarkdown(text)}</div>`;
   $('dl-' + tab).style.display = 'inline-block';
   $('dl-' + tab).onclick = () => download(text, fileName);
 }
 
 function showResult(tab, text, fileName, label, inputs) {
-  renderResult(tab, text, fileName, '');
+  renderResult(tab, text, fileName);
   if (label) {
     addHistory({ tab, label, text, inputs: inputs || null, date: fmtDate.format(new Date()) });
     renderHistory();
@@ -208,14 +216,12 @@ function showHistoryEntry(id) {
   view.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function restoreLastResults() {
+// Reload ပြီးရင် မေးခွန်းပဲ ပြန်ဖြည့်တာ — အဖြေက မှတ်တမ်း tab ထဲမှာပဲ ပြန်ကြည့်ရမယ်
+function restoreLastInputs() {
   const list = loadHistory();
   for (const tab of Object.keys(TAB_TITLES)) {
     const entry = list.find((x) => x.tab === tab);
-    if (entry) {
-      renderResult(tab, entry.text, DL_FILES[tab], 'သိမ်းထားတဲ့ အဖြေ — ' + (entry.date || ''));
-      applyInputs(entry.inputs);
-    }
+    if (entry) applyInputs(entry.inputs);
   }
 }
 
@@ -239,7 +245,9 @@ $('btn-comp').addEventListener('click', async (e) => {
   const uName = $('u-comp').value.trim(), pName = $('p-comp').value.trim();
   if (!uName || !pName) { showError('comp', 'အမည်နှစ်ခုလုံးကို ပြည့်စုံအောင် ဖြည့်ပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  runButton(btn, true, 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...');
+  const loadingLabel = 'နှစ်ဦးသား လိုက်ဖက်မှုကို တွက်ချက်နေပါသည်...';
+  runButton(btn, true, loadingLabel);
+  showLoading('comp', loadingLabel);
   try {
     const prompt = COMPATIBILITY_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('u-day-comp').value, pName, $('p-day-comp').value);
     showResult('comp', await askAI(prompt), 'compatibility_result.txt', shortLabel(uName + ' + ' + pName), { 'u-comp': uName, 'u-day-comp': $('u-day-comp').value, 'p-comp': pName, 'p-day-comp': $('p-day-comp').value });
@@ -252,7 +260,9 @@ $('btn-dream').addEventListener('click', async (e) => {
   const dream = $('dream-input').value.trim();
   if (!dream) { showError('dream', 'အိပ်မက်ကို အရင်ရေးပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
+  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
+  runButton(btn, true, loadingLabel);
+  showLoading('dream', loadingLabel);
   try {
     showResult('dream', await askAI(DREAM_TEMPLATE(SYSTEM_INSTRUCTION, dream)), 'dream.txt', shortLabel(dream), { 'dream-input': dream });
   } catch (err) { showError('dream', err.message); }
@@ -264,7 +274,9 @@ $('btn-yadaya').addEventListener('click', async (e) => {
   const uName = $('u-name').value.trim();
   if (!uName) { showError('yadaya', 'အမည် ထည့်ပေးပါ ခင်ဗျာ။'); return; }
   const btn = e.currentTarget;
-  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
+  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
+  runButton(btn, true, loadingLabel);
+  showLoading('yadaya', loadingLabel);
   try {
     showResult('yadaya', await askAI(YADAYA_TEMPLATE(SYSTEM_INSTRUCTION, uName, $('problem').value)), 'yadaya.txt', shortLabel(uName + ' — ' + $('problem').value), { 'u-name': uName, 'problem': $('problem').value });
   } catch (err) { showError('yadaya', err.message); }
@@ -274,7 +286,9 @@ $('btn-yadaya').addEventListener('click', async (e) => {
 // --- Tab 4: ဟောစာတမ်း ---
 $('btn-horo').addEventListener('click', async (e) => {
   const btn = e.currentTarget;
-  runButton(btn, true, 'သင့်အတွက် တွက်ချက်နေပါသည်...');
+  const loadingLabel = 'သင့်အတွက် တွက်ချက်နေပါသည်...';
+  runButton(btn, true, loadingLabel);
+  showLoading('horo', loadingLabel);
   try {
     showResult('horo', await askAI(HOROSCOPE_TEMPLATE(SYSTEM_INSTRUCTION, $('horo-day').value, todayLong)), 'horoscope.txt', shortLabel($('horo-day').value + ' နေ့ ဟောစာတမ်း'), { 'horo-day': $('horo-day').value });
   } catch (err) { showError('horo', err.message); }
@@ -308,7 +322,9 @@ $('btn-maha').addEventListener('click', async (e) => {
   const { remainder, position } = mahabote(dob, birthDay);
   updateMahaWarn();
   const btn = e.currentTarget;
-  runButton(btn, true, 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...');
+  const loadingLabel = 'မဟာဘုတ်ခွင် တွက်ချက်နေပါသည်...';
+  runButton(btn, true, loadingLabel);
+  showLoading('maha', loadingLabel);
   try {
     const prompt = MAHABOTE_TEMPLATE(SYSTEM_INSTRUCTION, dob, birthDay, remainder, position);
     showResult('maha', await askAI(prompt), 'mahabote_astrology.txt', shortLabel(dob + ' · ' + birthDay), { 'dob': dob, 'maha-day': birthDay });
@@ -340,9 +356,9 @@ $('dob').addEventListener('change', syncWeekdayFromDob);
     '&label=VISITORS&countColor=%23d4af37&style=flat';
   $('visitor-badge-link').href = 'https://visitorbadge.io/status?path=' + encodeURIComponent(url);
   $('fb-share').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
-  // မှတ်တမ်း — နောက်ဆုံး အဖြေတွေ ပြန်ဖော်တာ + list ပြတာ
-  restoreLastResults();
-  updateMahaWarn(); // သိမ်းထားတဲ့ မဟာဘုတ် entry ရှိရင် သတိပေးစာ အခြေအနေ မှန်အောင်
+  // မှတ်တမ်း — နောက်ဆုံး မေးခွန်းတွေ ပြန်ဖြည့်တာ + list ပြတာ (အဖြေက မှတ်တမ်း tab ထဲမှာပဲ ကြည့်ရမယ်)
+  restoreLastInputs();
+  updateMahaWarn(); // သိမ်းထားတဲ့ မဟာဘုတ် မေးခွန်း ရှိရင် သတိပေးစာ အခြေအနေ မှန်အောင်
   renderHistory();
   $('history-list').addEventListener('click', (e) => {
     const viewBtn = e.target.closest('.history-view-btn');
@@ -357,4 +373,4 @@ $('dob').addEventListener('change', syncWeekdayFromDob);
 })();
 
 // စမ်းသပ်ဖို့ (node) — browser မှာ အကျိုးမရှိပါ
-if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs, updateMahaWarn, syncWeekdayFromDob };
+if (typeof module !== 'undefined') module.exports = { mahabote, renderMarkdown, cleanText, dailyLucky, myNum, historyAdd, historyDelete, shortLabel, escapeHtml, HISTORY_MAX, applyInputs, updateMahaWarn, syncWeekdayFromDob, restoreLastInputs, showLoading };

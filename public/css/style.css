@@ -96,3 +96,10 @@ footer hr { border: 0; border-top: 1px solid rgba(212, 175, 55, .3); margin: 30p
 }
 .history-del-btn { color: #ff8a8a; border-color: #ff8a8a; }
 #history-view { margin-top: 14px; }
+
+/* Loading — ရွှေရောင် စကြာ လည်နေတာ */
+.loading-wrap { text-align: center; padding: 30px 0 22px; }
+.loading-wrap p { color: #D4AF37; margin: 14px 0 0; font-size: .95rem; }
+.chakra-spin { width: 54px; height: 54px; animation: chakra-spin 1.6s linear infinite; }
+@keyframes chakra-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .chakra-spin { animation: none; } }
